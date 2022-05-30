@@ -1,0 +1,30 @@
+---
+- hosts: test
+  become: true
+  vars:
+    - proxy_port: "8888"
+    - proxy_username: user
+    - proxy_password: pass
+    - proxy_allow_list: 
+      - 127.0.0.1
+      - 10.10.10.1
+
+  tasks:
+    - name: "Installing tinyproxy"
+      apt:
+        name:
+          - tinyproxy
+        state: latest
+        update_cache: yes
+        cache_valid_time: 3600
+    - name: "Copying tinyproxy.conf"
+      template:
+        src: tinyproxy.conf.j2
+        dest: /etc/tinyproxy/tinyproxy.conf
+      notify: "Restarting tinyproxy"
+
+  handlers:
+    - name: "Restarting tinyproxy"
+      service:
+        name: tinyproxy
+        state: restarted
